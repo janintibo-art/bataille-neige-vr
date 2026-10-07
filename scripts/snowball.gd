@@ -77,7 +77,7 @@ func _on_body_entered(body: Node) -> void:
     if body_team == team:
         return
 
-    var target := _find_damage_target(body)
+    var target: Node = _find_damage_target(body)
     if target != null:
         _apply_damage(target)
 
@@ -91,7 +91,7 @@ func _on_area_entered(area: Area3D) -> void:
     if area_team == team:
         return
 
-    var target := _find_damage_target(area)
+    var target: Node = _find_damage_target(area)
     if target != null:
         _apply_damage(target)
         _impact(target)
@@ -100,7 +100,7 @@ func _apply_damage(target: Node) -> void:
     if target == null or not target.has_method("take_hit"):
         return
 
-    var impulse := Vector3.ZERO
+    var impulse: Vector3 = Vector3.ZERO
     if linear_velocity.length() > 0.1:
         impulse = linear_velocity.normalized() * (5.5 if giant else 1.2)
 
@@ -118,19 +118,24 @@ func _impact(primary_target: Node) -> void:
     queue_free()
 
 func _splash_damage(primary_target: Node) -> void:
-    for enemy in get_tree().get_nodes_in_group("enemies"):
-        if enemy == primary_target or not is_instance_valid(enemy):
+    var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+
+    for enemy_node: Node in enemies:
+        if enemy_node == primary_target or not is_instance_valid(enemy_node):
             continue
-        if not enemy.has_method("take_hit"):
+        if not enemy_node.has_method("take_hit"):
+            continue
+        if not enemy_node is Node3D:
             continue
 
-        var distance := global_position.distance_to(enemy.global_position)
+        var enemy_3d: Node3D = enemy_node as Node3D
+        var distance: float = global_position.distance_to(enemy_3d.global_position)
         if distance <= 1.85:
-            var push := enemy.global_position - global_position
+            var push: Vector3 = enemy_3d.global_position - global_position
             push.y = 0.18
             if push.length() < 0.01:
                 push = Vector3.FORWARD
-            enemy.call("take_hit", 2, push.normalized() * 4.5)
+            enemy_node.call("take_hit", 2, push.normalized() * 4.5)
 
 func _spawn_snow_puff(size_multiplier: float) -> void:
     var root := Node3D.new()
@@ -138,7 +143,7 @@ func _spawn_snow_puff(size_multiplier: float) -> void:
     get_tree().current_scene.add_child(root)
     root.global_position = global_position
 
-    var directions := [
+    var directions: Array[Vector3] = [
         Vector3(1.0, 0.4, 0.0),
         Vector3(-1.0, 0.5, 0.2),
         Vector3(0.2, 0.7, 1.0),
@@ -150,7 +155,7 @@ func _spawn_snow_puff(size_multiplier: float) -> void:
     var tween := root.create_tween()
     tween.set_parallel(true)
 
-    for i in directions.size():
+    for i: int in directions.size():
         var flake := MeshInstance3D.new()
         var mesh := SphereMesh.new()
         mesh.radius = 0.035 * size_multiplier
@@ -163,7 +168,10 @@ func _spawn_snow_puff(size_multiplier: float) -> void:
         flake.material_override = mat
 
         root.add_child(flake)
-        var destination := directions[i].normalized() * (0.35 + 0.08 * i) * size_multiplier
+
+        var distance: float = (0.35 + 0.08 * float(i)) * size_multiplier
+        var destination: Vector3 = directions[i].normalized() * distance
+
         tween.tween_property(flake, "position", destination, 0.28)
         tween.tween_property(flake, "scale", Vector3.ZERO, 0.30)
 
