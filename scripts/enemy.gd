@@ -24,6 +24,9 @@ var base_scale := 1.0
 var body_material: StandardMaterial3D
 var defeated_once := false
 
+var knockback_timer := 0.0
+var knockback_velocity := Vector3.ZERO
+
 func setup(player_target: Node3D, profile: Dictionary, index: int) -> void:
     target = player_target
     enemy_index = index
@@ -35,6 +38,7 @@ func setup(player_target: Node3D, profile: Dictionary, index: int) -> void:
 
     set_meta("team", "enemy")
     set_meta("display_name", display_name)
+    add_to_group("enemies")
 
     _configure_kind()
     _build_visual()
@@ -160,6 +164,13 @@ func _physics_process(delta: float) -> void:
     if target == null or defeated_once:
         return
 
+    if knockback_timer > 0.0:
+        knockback_timer -= delta
+        velocity = knockback_velocity
+        knockback_velocity = knockback_velocity.lerp(Vector3.ZERO, minf(1.0, delta * 5.0))
+        move_and_slide()
+        return
+
     throw_timer -= delta
     strafe_phase += delta * phase_speed * (0.85 + enemy_index * 0.01)
 
@@ -192,17 +203,22 @@ func _throw_at_player() -> void:
     ball.set_script(SNOWBALL_SCRIPT)
     get_tree().current_scene.add_child(ball)
     ball.global_position = global_position + Vector3(0.0, 1.45, 0.0)
-    ball.call("setup", "enemy", 0.105 if enemy_kind != "boss" else 0.15, self)
+    ball.call("setup", "enemy", 0.105 if enemy_kind != "boss" else 0.15, self, 1, false)
 
     var aim_point := target.global_position + Vector3(0.0, 1.15, 0.0)
     var direction := (aim_point - ball.global_position).normalized()
     ball.linear_velocity = direction * snowball_speed + Vector3.UP * 0.85
 
-func take_hit(amount: int) -> void:
+func take_hit(amount: int, impulse: Vector3 = Vector3.ZERO) -> void:
     if defeated_once:
         return
 
     hit_points -= amount
+
+    if impulse.length() > 0.1:
+        knockback_timer = 0.34
+        knockback_velocity = impulse
+
     scale = Vector3.ONE * base_scale * 1.07
     var tween := create_tween()
     tween.tween_property(self, "scale", Vector3.ONE * base_scale, 0.12)
