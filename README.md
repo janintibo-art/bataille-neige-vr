@@ -2,29 +2,33 @@
 
 Jeu VR de bataille de neige pour Meta Quest 3, realise sous Godot 4.7.2 + OpenXR.
 
-## V5 - premiere boucle de beat'em all
+## V7 - les 20 adversaires
 
-- compilation APK Quest 3 automatique par GitHub Actions ;
-- arene enneigee avec cabane, sapins, murets et couvertures ;
-- deplacement au joystick gauche et rotation par crans au joystick droit ;
-- ramassage de neige avec le grip pres du sol ;
-- lancer de boule de neige a la gachette ;
-- les boules ennemies peuvent maintenant toucher le joueur ;
-- 5 points de vie representes par cinq petites boules lumineuses sur le poignet gauche ;
-- retour au point de depart apres un KO, sans reinitialiser la vague ;
-- 3 vagues successives ;
-- 12 adversaires au total dans ce prototype ;
-- 4 archetypes d'ennemis : standard, coureur, sniper et tank ;
-- adversaires avec vitesses, distances de combat, cadence de tir et resistance differentes ;
-- les boules de neige ennemies sont legerement bleutees pour etre identifiables.
+- 20 personnages nommes repartis sur 5 vagues ;
+- Berni, Kevin Turbo, Chantal Mitraillette, Marco Longue Vue ;
+- Lea l'Esquive, Jojo la Doudoune, Dede les Poches, Nono Ninja ;
+- Ginette du Balcon, Titou la Pelle, Lucette la Moufle, Pierrot de Travers ;
+- Momo le Tricheur, Gerard le Bucheron, Fifi Flocon, Josiane Camouflage ;
+- Maurice Bonhomme, Gaston Glacon, Robert Couvercle et Raoul le Chef ;
+- 6 archetypes de combat : standard, runner, rapid, sniper, tank et zigzag ;
+- Raoul le Chef devient le premier mini-boss avec 8 points de vie et de grosses boules de neige ;
+- plusieurs silhouettes et accessoires proceduraux : bonnets, pompons, cache-oreilles, lunettes, capuche, bandeau, echarpe et moustache ;
+- bras et jambes visibles pour donner une vraie silhouette aux personnages ;
+- petit fort de neige en U utilisable comme couverture ;
+- deux gros bonshommes de neige servant aussi de couvertures ;
+- la structure des personnages est separee dans `scripts/roster.gd` pour faciliter les futures zones.
 
-## Direction du projet
+## Gameplay deja present
 
-Le jeu final doit devenir un beat'em all VR humoristique avec au moins une vingtaine de personnages differents, plusieurs zones enneigees, des couvertures variees, mini-boss et boss, tout en gardant des graphismes propres et epures adaptes au Quest 3.
+- deplacement au joystick gauche ;
+- rotation par crans au joystick droit ;
+- ramassage de neige au grip pres du sol ;
+- lancer a la gachette ;
+- 5 points de vie au poignet ;
+- impacts ennemis et vibrations ;
+- reapparition apres KO ;
+- compilation Quest 3 automatique avec GitHub Actions.
 
-## Controles
+## Suite prevue
 
-- Stick gauche : deplacement.
-- Stick droit gauche/droite : rotation de 30 degres.
-- Grip pres du sol : ramasser de la neige.
-- Trigger : lancer la boule tenue.
+La prochaine etape pourra enrichir les sensations de lancer : vitesse basee sur le vrai geste de la main, grosse boule a deux mains et effets d'impact dans la neige.
