@@ -85,6 +85,19 @@ jobs:
           cat import.log
           if grep -qE "SCRIPT ERROR|Parse Error" import.log; then exit 1; fi
 
+      - name: Test de demarrage du jeu
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 20 godot --headless --path . --quit-after 120 2>&1 | tee runtime.log || STATUS=$?
+          STATUS=${STATUS:-0}
+          if grep -qE "SCRIPT ERROR|Parse Error|Invalid call|Invalid access|Failed to load script|ERROR:.*main.gd|ERROR:.*player_vr.gd|ERROR:.*enemy.gd|ERROR:.*snowball.gd" runtime.log; then
+            exit 1
+          fi
+          if [ "$STATUS" -ne 0 ] && [ "$STATUS" -ne 124 ]; then
+            exit "$STATUS"
+          fi
+
       - name: Creer la cle debug Android
         shell: bash
         run: |

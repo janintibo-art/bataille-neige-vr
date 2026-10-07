@@ -17,9 +17,28 @@ var objective_active := false
 
 func _ready() -> void:
     _init_xr()
-    _build_environment()
+    await get_tree().process_frame
+
+    _build_environment_base()
+    await get_tree().process_frame
+
+    _build_village()
+    await get_tree().process_frame
+    _build_forest()
+    await get_tree().process_frame
+    _build_frozen_river()
+    await get_tree().process_frame
+    _build_sawmill()
+    await get_tree().process_frame
+    _build_raoul_fort()
+    await get_tree().process_frame
+    _build_route_trees()
+    await get_tree().process_frame
+
     _build_player()
+    await get_tree().process_frame
     _build_objective_beacon()
+    await get_tree().process_frame
     _start_wave(1)
 
 func _process(_delta: float) -> void:
@@ -30,14 +49,22 @@ func _process(_delta: float) -> void:
         objective_active = false
 
 func _init_xr() -> void:
-    var xr_interface := XRServer.find_interface("OpenXR")
-    if xr_interface and xr_interface.initialize():
-        get_viewport().use_xr = true
-        print("OpenXR initialise")
-    else:
-        print("OpenXR indisponible : le prototype reste visible en mode ecran")
+    var xr_interface: XRInterface = XRServer.find_interface("OpenXR")
+    if xr_interface == null:
+        print("OpenXR indisponible : mode ecran")
+        return
 
-func _build_environment() -> void:
+    if not xr_interface.is_initialized():
+        var ok: bool = xr_interface.initialize()
+        if not ok:
+            print("OpenXR non initialise : mode ecran")
+            return
+
+    get_viewport().use_xr = true
+    DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+    print("OpenXR pret")
+
+func _build_environment_base() -> void:
     var world := WorldEnvironment.new()
     var env := Environment.new()
     env.background_mode = Environment.BG_COLOR
@@ -50,18 +77,11 @@ func _build_environment() -> void:
 
     var sun := DirectionalLight3D.new()
     sun.rotation_degrees = Vector3(-48.0, -28.0, 0.0)
-    sun.light_energy = 1.15
+    sun.light_energy = 1.05
     sun.shadow_enabled = true
     add_child(sun)
 
     _add_box_static("SolPrincipal", Vector3(40.0, 0.4, 180.0), Vector3(0.0, -0.2, -65.0), Color("f4fbff"))
-
-    _build_village()
-    _build_forest()
-    _build_frozen_river()
-    _build_sawmill()
-    _build_raoul_fort()
-    _build_route_trees()
 
 func _build_village() -> void:
     _add_box_static("CabaneVillage", Vector3(5.0, 2.8, 4.0), Vector3(0.0, 1.4, -8.0), Color("8d5a3a"))
