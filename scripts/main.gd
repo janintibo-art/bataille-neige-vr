@@ -11,11 +11,23 @@ var living_enemies := 0
 var enemy_serial := 0
 var wave_transition := false
 
+var objective_beacon: Node3D
+var objective_target := Vector3.ZERO
+var objective_active := false
+
 func _ready() -> void:
     _init_xr()
     _build_environment()
     _build_player()
+    _build_objective_beacon()
     _start_wave(1)
+
+func _process(_delta: float) -> void:
+    if not objective_active or objective_beacon == null or player_origin == null:
+        return
+    if player_origin.global_position.distance_to(objective_target) < 7.0:
+        objective_beacon.visible = false
+        objective_active = false
 
 func _init_xr() -> void:
     var xr_interface := XRServer.find_interface("OpenXR")
@@ -42,27 +54,71 @@ func _build_environment() -> void:
     sun.shadow_enabled = true
     add_child(sun)
 
-    _add_box_static("Sol", Vector3(34.0, 0.4, 34.0), Vector3(0.0, -0.2, 0.0), Color("f4fbff"))
+    _add_box_static("SolPrincipal", Vector3(40.0, 0.4, 180.0), Vector3(0.0, -0.2, -65.0), Color("f4fbff"))
 
-    _add_box_static("Cabane", Vector3(5.0, 2.8, 4.0), Vector3(0.0, 1.4, -8.0), Color("8d5a3a"))
-    _add_box_static("ToitCabane", Vector3(5.8, 0.35, 4.8), Vector3(0.0, 3.0, -8.0), Color("edf7ff"), Vector3(0.0, 0.0, 7.0))
+    _build_village()
+    _build_forest()
+    _build_frozen_river()
+    _build_sawmill()
+    _build_raoul_fort()
+    _build_route_trees()
 
-    _add_box_static("MuretG", Vector3(3.2, 1.0, 0.7), Vector3(-5.0, 0.5, -1.0), Color("d9eef8"))
-    _add_box_static("MuretD", Vector3(3.2, 1.0, 0.7), Vector3(5.0, 0.5, -1.0), Color("d9eef8"))
-    _add_box_static("TasBois", Vector3(2.8, 1.2, 1.2), Vector3(-8.0, 0.6, -6.0), Color("9a6946"))
-    _add_box_static("BancNeige", Vector3(3.0, 0.75, 0.8), Vector3(8.0, 0.38, 5.0), Color("e2f2f9"))
+func _build_village() -> void:
+    _add_box_static("CabaneVillage", Vector3(5.0, 2.8, 4.0), Vector3(0.0, 1.4, -8.0), Color("8d5a3a"))
+    _add_box_static("ToitVillage", Vector3(5.8, 0.35, 4.8), Vector3(0.0, 3.0, -8.0), Color("edf7ff"), Vector3(0.0, 0.0, 7.0))
+    _add_box_static("MuretVillageG", Vector3(3.2, 1.0, 0.7), Vector3(-5.0, 0.5, -1.0), Color("d9eef8"))
+    _add_box_static("MuretVillageD", Vector3(3.2, 1.0, 0.7), Vector3(5.0, 0.5, -1.0), Color("d9eef8"))
+    _add_box_static("TasBoisVillage", Vector3(2.8, 1.2, 1.2), Vector3(-8.0, 0.6, -6.0), Color("9a6946"))
+    _add_snowman_cover("BonhommeVillage", Vector3(8.0, 0.0, -6.0))
 
-    _add_snow_fort()
-    _add_snowman_cover("BonhommeG", Vector3(-10.0, 0.0, -5.5))
-    _add_snowman_cover("BonhommeD", Vector3(10.0, 0.0, -6.5))
+func _build_forest() -> void:
+    _add_box_static("TroncCoucheForet", Vector3(4.0, 0.7, 0.8), Vector3(-5.0, 0.35, -35.0), Color("76503a"), Vector3(0, 18, 0))
+    _add_box_static("RocherForet", Vector3(2.0, 1.3, 1.8), Vector3(6.0, 0.65, -37.0), Color("b8c7cf"))
+    _add_snowman_cover("BonhommeForet", Vector3(0.0, 0.0, -43.0))
 
-    var tree_positions := [
-        Vector3(-9, 0, 5), Vector3(-12, 0, -2), Vector3(-9, 0, -11),
-        Vector3(9, 0, 6), Vector3(12, 0, -2), Vector3(10, 0, -11),
-        Vector3(-4, 0, 11), Vector3(5, 0, 12)
+    var forest_trees: Array[Vector3] = [
+        Vector3(-10, 0, -27), Vector3(10, 0, -28),
+        Vector3(-8, 0, -33), Vector3(9, 0, -35),
+        Vector3(-11, 0, -40), Vector3(11, 0, -42),
+        Vector3(-7, 0, -46), Vector3(8, 0, -48)
     ]
-    for i in tree_positions.size():
-        _add_tree("Sapin_%02d" % i, tree_positions[i])
+    for i in forest_trees.size():
+        _add_tree("ForetSapin_%02d" % i, forest_trees[i])
+
+func _build_frozen_river() -> void:
+    _add_box_visual("GlaceRiviere", Vector3(18.0, 0.05, 17.0), Vector3(0.0, 0.03, -65.0), Color("b9e4f4"))
+    _add_box_static("BergeG", Vector3(3.0, 1.0, 1.0), Vector3(-7.0, 0.5, -61.0), Color("d9eef8"))
+    _add_box_static("BergeD", Vector3(3.0, 1.0, 1.0), Vector3(7.0, 0.5, -69.0), Color("d9eef8"))
+    _add_box_static("BarqueGelee", Vector3(2.8, 0.6, 1.2), Vector3(-4.0, 0.3, -68.0), Color("8f6548"), Vector3(0, 24, 0))
+    _add_snowman_cover("BonhommeRiviere", Vector3(6.0, 0.0, -60.0))
+
+func _build_sawmill() -> void:
+    _add_box_static("Scierie", Vector3(7.0, 3.2, 5.0), Vector3(-5.5, 1.6, -98.0), Color("80583d"))
+    _add_box_static("ToitScierie", Vector3(7.8, 0.4, 5.8), Vector3(-5.5, 3.4, -98.0), Color("e6f3f8"), Vector3(0, 0, 6))
+    _add_box_static("PileBois1", Vector3(3.6, 1.4, 1.2), Vector3(5.5, 0.7, -92.0), Color("9a6946"))
+    _add_box_static("PileBois2", Vector3(3.0, 1.1, 1.0), Vector3(6.5, 0.55, -101.0), Color("8a5d40"))
+    _add_box_static("CaisseScierie", Vector3(1.6, 1.5, 1.6), Vector3(1.0, 0.75, -96.0), Color("a6734d"))
+
+func _build_raoul_fort() -> void:
+    var snow := Color("dceff8")
+    _add_box_static("FortFond", Vector3(12.0, 2.1, 0.8), Vector3(0.0, 1.05, -143.0), snow)
+    _add_box_static("FortGauche", Vector3(0.8, 2.1, 12.0), Vector3(-6.0, 1.05, -137.0), snow)
+    _add_box_static("FortDroite", Vector3(0.8, 2.1, 12.0), Vector3(6.0, 1.05, -137.0), snow)
+    _add_box_static("FortMuretG", Vector3(4.0, 1.25, 0.8), Vector3(-4.0, 0.62, -126.0), snow)
+    _add_box_static("FortMuretD", Vector3(4.0, 1.25, 0.8), Vector3(4.0, 0.62, -126.0), snow)
+    _add_snowman_cover("GardeNeigeG", Vector3(-4.5, 0.0, -134.0))
+    _add_snowman_cover("GardeNeigeD", Vector3(4.5, 0.0, -134.0))
+
+func _build_route_trees() -> void:
+    var route_trees: Array[Vector3] = [
+        Vector3(-12, 0, 8), Vector3(12, 0, 7),
+        Vector3(-13, 0, -15), Vector3(13, 0, -18),
+        Vector3(-13, 0, -52), Vector3(13, 0, -50),
+        Vector3(-12, 0, -78), Vector3(12, 0, -80),
+        Vector3(-13, 0, -110), Vector3(13, 0, -111)
+    ]
+    for i in route_trees.size():
+        _add_tree("RouteSapin_%02d" % i, route_trees[i])
 
 func _build_player() -> void:
     player_origin = XROrigin3D.new()
@@ -80,7 +136,6 @@ func _build_player() -> void:
     var right := _make_controller("RightHand", &"right_hand")
     player_origin.add_child(left)
     player_origin.add_child(right)
-
     player_origin.call_deferred("setup", camera, left, right)
 
     if not get_viewport().use_xr:
@@ -101,18 +156,61 @@ func _make_controller(node_name: String, tracker_name: StringName) -> XRControll
     controller.add_child(hand)
     return controller
 
+func _build_objective_beacon() -> void:
+    objective_beacon = Node3D.new()
+    objective_beacon.name = "RepereObjectif"
+    add_child(objective_beacon)
+
+    var pole := MeshInstance3D.new()
+    var pole_mesh := CylinderMesh.new()
+    pole_mesh.top_radius = 0.05
+    pole_mesh.bottom_radius = 0.05
+    pole_mesh.height = 2.8
+    pole.mesh = pole_mesh
+    pole.position.y = 1.4
+    pole.material_override = _material(Color("f2a64b"))
+    objective_beacon.add_child(pole)
+
+    var orb := MeshInstance3D.new()
+    var orb_mesh := SphereMesh.new()
+    orb_mesh.radius = 0.28
+    orb_mesh.height = 0.56
+    orb.mesh = orb_mesh
+    orb.position.y = 3.0
+
+    var glow := StandardMaterial3D.new()
+    glow.albedo_color = Color("ffd27a")
+    glow.emission_enabled = true
+    glow.emission = Color("ffbd52")
+    glow.emission_energy_multiplier = 2.2
+    orb.material_override = glow
+    objective_beacon.add_child(orb)
+
+func _set_objective(pos: Vector3) -> void:
+    objective_target = pos
+    objective_beacon.position = pos
+    objective_beacon.visible = true
+    objective_active = true
+
 func _start_wave(wave_number: int) -> void:
     current_wave = wave_number
     wave_transition = false
+
     var data := ROSTER.get_wave(wave_number)
     living_enemies = data.size()
-
     if living_enemies == 0:
         return
 
-    print("=== VAGUE %d/%d ===" % [current_wave, ROSTER.wave_count()])
+    var checkpoint: Vector3 = ROSTER.get_checkpoint(wave_number)
+    if player_origin.has_method("set_checkpoint"):
+        player_origin.call("set_checkpoint", checkpoint)
+
+    _set_objective(checkpoint)
+
+    print("=== VAGUE %d/%d : %s ===" % [current_wave, ROSTER.wave_count(), ROSTER.get_zone_name(current_wave)])
+
     for entry in data:
-        print(" - %s" % entry["display_name"])
+        print(" - %s" % String(entry["display_name"]))
 
         var enemy := CharacterBody3D.new()
         enemy_serial += 1
@@ -136,18 +234,14 @@ func _on_enemy_defeated(enemy: Node) -> void:
 
     wave_transition = true
     if current_wave >= ROSTER.wave_count():
+        objective_beacon.visible = false
+        objective_active = false
         print("ZONE SECURISEE ! Les 20 adversaires sont battus.")
         return
 
-    print("Vague terminee. Prochaine vague dans 2 secondes.")
-    await get_tree().create_timer(2.0).timeout
+    print("Zone nettoyee. Avancez vers la prochaine zone.")
+    await get_tree().create_timer(1.5).timeout
     _start_wave(current_wave + 1)
-
-func _add_snow_fort() -> void:
-    var snow := Color("dceff8")
-    _add_box_static("FortCentre", Vector3(4.6, 1.25, 0.65), Vector3(0.0, 0.62, 3.0), snow)
-    _add_box_static("FortGauche", Vector3(0.65, 1.25, 2.6), Vector3(-2.0, 0.62, 4.0), snow)
-    _add_box_static("FortDroite", Vector3(0.65, 1.25, 2.6), Vector3(2.0, 0.62, 4.0), snow)
 
 func _add_snowman_cover(node_name: String, pos: Vector3) -> void:
     var body := StaticBody3D.new()
@@ -211,6 +305,21 @@ func _add_box_static(node_name: String, size: Vector3, pos: Vector3, color: Colo
     shape.size = size
     collision.shape = shape
     body.add_child(collision)
+
+func _add_box_visual(node_name: String, size: Vector3, pos: Vector3, color: Color) -> void:
+    var mesh_instance := MeshInstance3D.new()
+    mesh_instance.name = node_name
+    mesh_instance.position = pos
+
+    var box := BoxMesh.new()
+    box.size = size
+    mesh_instance.mesh = box
+
+    var mat := _material(color)
+    mat.metallic = 0.1
+    mat.roughness = 0.35
+    mesh_instance.material_override = mat
+    add_child(mesh_instance)
 
 func _add_tree(node_name: String, pos: Vector3) -> void:
     var root := StaticBody3D.new()

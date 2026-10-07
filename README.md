@@ -2,38 +2,36 @@
 
 Jeu VR de bataille de neige pour Meta Quest 3, realise sous Godot 4.7.2 + OpenXR.
 
-## V8 - lancer physique et grosse boule
+## V10 - premiere vraie carte
 
-### Lancer naturel
-- la direction et la puissance d'une boule utilisent maintenant la vitesse reelle de la main ;
-- la vitesse des mains est echantillonnee et lissee pour eviter les lancers nerveux ;
-- un petit geste reste jouable grace a une vitesse minimale ;
-- les gestes tres violents sont limites pour garder un comportement stable sur Quest 3 ;
-- nouvelle logique : on serre la gachette pour tenir la boule, puis on relache la gachette pour la lancer.
+Le prototype n'est plus une seule arene. Les 20 adversaires sont maintenant repartis sur cinq zones reliees :
 
-### Grosse boule a deux mains
-1. ramasser une boule de neige dans chaque main ;
-2. garder les deux grips serres ;
-3. rapprocher les deux mains ;
-4. maintenir environ 0,75 seconde : les deux boules se compactent en une grosse boule ;
-5. serrer les deux gachettes ;
-6. faire le geste de lancer avec les deux mains et relacher les deux gachettes.
+1. Village des Flocons
+2. Foret des Sapins Tordus
+3. Riviere Gelee
+4. Vieille Scierie
+5. Fort de Raoul
 
-La grosse boule :
-- inflige 3 points de degats sur l'impact direct ;
-- inflige 2 points aux adversaires tres proches ;
-- repousse les adversaires ;
-- produit une grosse eclaboussure de neige.
+### Progression
+- chaque vague se trouve dans une zone differente ;
+- les ennemis restent dans leur secteur tant que le joueur n'approche pas ;
+- un grand repere orange lumineux indique la prochaine zone ;
+- le repere disparait lorsque le joueur arrive a proximite ;
+- chaque nouvelle zone devient le point de reapparition apres un KO.
 
-### Impacts
-- toutes les boules produisent maintenant un petit nuage de neige ;
-- les adversaires peuvent etre legerement repousses par les impacts ;
-- les 20 personnages, les 5 vagues et Raoul le Chef restent en place.
+### Nouveaux decors
+- grande carte enneigee allongee ;
+- village et cabane de depart ;
+- foret plus dense avec tronc couche et rocher ;
+- riviere gelee bleutee, berges et barque prise dans la glace ;
+- vieille scierie, piles de bois et caisses ;
+- grand fort de neige de Raoul avec murets et gardes bonshommes de neige ;
+- sapins le long de la route.
 
-## Controles
-- Stick gauche : deplacement.
-- Stick droit : rotation par crans.
-- Grip pres du sol : ramasser une boule.
-- Trigger maintenu puis relache : lancer avec le vrai geste de la main.
-- Deux boules + deux grips + mains rapprochees : fabriquer une grosse boule.
-- Deux triggers puis relache : lancer la grosse boule.
+### Gameplay conserve
+- lancer physique base sur le vrai mouvement des mains ;
+- grosse boule a deux mains ;
+- impacts et eclaboussures de neige ;
+- 20 personnages nommes ;
+- 5 vagues ;
+- Raoul le Chef comme mini-boss final de cette premiere carte.

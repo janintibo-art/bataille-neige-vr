@@ -21,8 +21,10 @@ var move_speed := 1.05
 var preferred_distance := 5.5
 var snowball_speed := 8.0
 var base_scale := 1.0
+var activation_distance := 18.0
 var body_material: StandardMaterial3D
 var defeated_once := false
+var activated := false
 
 var knockback_timer := 0.0
 var knockback_velocity := Vector3.ZERO
@@ -34,6 +36,7 @@ func setup(player_target: Node3D, profile: Dictionary, index: int) -> void:
     display_name = String(profile.get("display_name", "Adversaire"))
     look_id = int(profile.get("look", 0))
     main_color = profile.get("color", Color("ef5d60"))
+    activation_distance = float(profile.get("activation_distance", 18.0))
     strafe_phase = float(index) * 1.8
 
     set_meta("team", "enemy")
@@ -164,6 +167,18 @@ func _physics_process(delta: float) -> void:
     if target == null or defeated_once:
         return
 
+    var to_player := target.global_position - global_position
+    to_player.y = 0.0
+    var distance := to_player.length()
+
+    if not activated:
+        velocity = Vector3.ZERO
+        if distance > activation_distance:
+            return
+        activated = true
+        throw_timer = 0.8 + float(enemy_index % 4) * 0.18
+        print("%s entre dans la bataille !" % display_name)
+
     if knockback_timer > 0.0:
         knockback_timer -= delta
         velocity = knockback_velocity
@@ -173,10 +188,6 @@ func _physics_process(delta: float) -> void:
 
     throw_timer -= delta
     strafe_phase += delta * phase_speed * (0.85 + enemy_index * 0.01)
-
-    var to_player := target.global_position - global_position
-    to_player.y = 0.0
-    var distance := to_player.length()
 
     if distance > preferred_distance:
         var approach := to_player.normalized()
@@ -214,6 +225,7 @@ func take_hit(amount: int, impulse: Vector3 = Vector3.ZERO) -> void:
         return
 
     hit_points -= amount
+    activated = true
 
     if impulse.length() > 0.1:
         knockback_timer = 0.34

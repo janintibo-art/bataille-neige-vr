@@ -263,6 +263,10 @@ func _throw_giant_ball() -> void:
     _pulse(left_hand, 1.0, 0.12)
     _pulse(right_hand, 1.0, 0.12)
 
+func set_checkpoint(pos: Vector3) -> void:
+    spawn_position = pos
+    print("Nouveau point de reapparition : ", spawn_position)
+
 func take_hit(amount: int = 1, _impulse: Vector3 = Vector3.ZERO) -> void:
     if invulnerability > 0.0:
         return
