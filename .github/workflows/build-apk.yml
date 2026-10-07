@@ -1,0 +1,54 @@
+name: Build APK Quest 3
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: "4.3"
+  EXPORT_NAME: "bataille-neige-vr"
+
+jobs:
+  build-apk:
+    name: Build Quest 3 APK
+    runs-on: ubuntu-24.04
+    container:
+      image: barichello/godot-ci:4.3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Godot export environment
+        shell: bash
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          mkdir -p ~/.config
+          if [ -d /root/.config/godot ]; then cp -r /root/.config/godot ~/.config/; fi
+          cp -r /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/
+          if [ -f ~/.config/godot/editor_settings-4.3.tres ]; then
+            echo 'export/android/java_sdk_path = "/usr/lib/jvm/java-17-openjdk-amd64"' >> ~/.config/godot/editor_settings-4.3.tres
+          fi
+
+      - name: Import and validate project
+        shell: bash
+        run: |
+          godot --headless --path . --editor --quit-after 2
+
+      - name: Build debug APK for Quest 3
+        shell: bash
+        run: |
+          mkdir -p build/android
+          godot --headless --verbose --path . --export-debug "Quest 3" "build/android/${EXPORT_NAME}.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bataille-neige-vr-quest3-apk
+          path: build/android/bataille-neige-vr.apk
+          if-no-files-found: error
