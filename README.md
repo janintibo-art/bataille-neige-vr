@@ -1,29 +1,30 @@
 # Bataille de Neige VR
 
-Prototype VR pour Meta Quest 3 réalisé sous Godot 4 + OpenXR.
+Jeu VR de bataille de neige pour Meta Quest 3, realise sous Godot 4.7.2 + OpenXR.
 
-## V1
+## V5 - premiere boucle de beat'em all
 
-- arène enneigée simple et lisible ;
-- cabane, sapins et murets servant de couvertures ;
-- déplacement au joystick gauche ;
-- rotation par crans au joystick droit ;
-- deux mains VR ;
-- ramassage de neige : serrer la poignée (`grip`) avec la main proche du sol ;
-- lancer : appuyer sur la gâchette (`trigger`) une fois une boule chargée ;
-- vibrations lors du ramassage et du tir ;
-- 3 adversaires prototypes qui se déplacent et lancent des boules ;
-- 3 impacts pour éliminer un adversaire.
+- compilation APK Quest 3 automatique par GitHub Actions ;
+- arene enneigee avec cabane, sapins, murets et couvertures ;
+- deplacement au joystick gauche et rotation par crans au joystick droit ;
+- ramassage de neige avec le grip pres du sol ;
+- lancer de boule de neige a la gachette ;
+- les boules ennemies peuvent maintenant toucher le joueur ;
+- 5 points de vie representes par cinq petites boules lumineuses sur le poignet gauche ;
+- retour au point de depart apres un KO, sans reinitialiser la vague ;
+- 3 vagues successives ;
+- 12 adversaires au total dans ce prototype ;
+- 4 archetypes d'ennemis : standard, coureur, sniper et tank ;
+- adversaires avec vitesses, distances de combat, cadence de tir et resistance differentes ;
+- les boules de neige ennemies sont legerement bleutees pour etre identifiables.
 
 ## Direction du projet
 
-Le jeu final doit être un beat'em all VR humoristique avec au moins une vingtaine de personnages différents, plusieurs zones enneigées, des couvertures variées, mini-boss et boss, tout en gardant des graphismes propres et épurés adaptés au Quest 3.
+Le jeu final doit devenir un beat'em all VR humoristique avec au moins une vingtaine de personnages differents, plusieurs zones enneigees, des couvertures variees, mini-boss et boss, tout en gardant des graphismes propres et epures adaptes au Quest 3.
 
-## Contrôles prototype
+## Controles
 
-- Stick gauche : déplacement.
-- Stick droit gauche/droite : rotation de 30 degrés.
-- Grip près du sol : ramasser de la neige.
+- Stick gauche : deplacement.
+- Stick droit gauche/droite : rotation de 30 degres.
+- Grip pres du sol : ramasser de la neige.
 - Trigger : lancer la boule tenue.
-
-Le prototype utilise volontairement l'action map OpenXR par défaut de Godot pour faciliter le premier démarrage.
