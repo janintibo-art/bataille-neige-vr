@@ -30,8 +30,25 @@ func setup(source_team: String, radius: float = 0.11, owner_body: PhysicsBody3D 
     collision.shape = shape
     add_child(collision)
 
+    # Le RigidBody detecte les corps physiques.
     body_entered.connect(_on_body_entered)
-    area_entered.connect(_on_area_entered)
+
+    # Un Area3D enfant detecte les zones, notamment la hitbox VR du joueur.
+    var detector := Area3D.new()
+    detector.name = "AreaDetector"
+    detector.monitoring = true
+    detector.monitorable = false
+    detector.collision_layer = 0
+    detector.collision_mask = 1
+    add_child(detector)
+
+    var detector_collision := CollisionShape3D.new()
+    var detector_shape := SphereShape3D.new()
+    detector_shape.radius = radius * 1.08
+    detector_collision.shape = detector_shape
+    detector.add_child(detector_collision)
+
+    detector.area_entered.connect(_on_area_entered)
 
 func _physics_process(delta: float) -> void:
     age += delta
@@ -46,22 +63,21 @@ func _on_body_entered(body: Node) -> void:
     if body_team == team:
         return
 
-    if team == "player" and body.has_method("take_hit"):
-        body.call("take_hit", 1)
-        queue_free()
-        return
+    if team == "player":
+        var target := _find_damage_target(body)
+        if target != null:
+            target.call("take_hit", 1)
+            queue_free()
+            return
 
     if team == "enemy":
-        if body.has_method("take_hit"):
-            body.call("take_hit", 1)
-            queue_free()
-            return
-        var parent := body.get_parent()
-        if parent and parent.has_method("take_hit"):
-            parent.call("take_hit", 1)
+        var target := _find_damage_target(body)
+        if target != null:
+            target.call("take_hit", 1)
             queue_free()
             return
 
+    # La boule disparait aussi lorsqu'elle frappe le decor.
     queue_free()
 
 func _on_area_entered(area: Area3D) -> void:
@@ -72,7 +88,15 @@ func _on_area_entered(area: Area3D) -> void:
     if area_team == team:
         return
 
-    var target := area.get_parent()
-    if target and target.has_method("take_hit"):
+    var target := _find_damage_target(area)
+    if target != null:
         target.call("take_hit", 1)
         queue_free()
+
+func _find_damage_target(node: Node) -> Node:
+    var current: Node = node
+    while current != null:
+        if current.has_method("take_hit"):
+            return current
+        current = current.get_parent()
+    return null
